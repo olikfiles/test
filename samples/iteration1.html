@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYÖ & JUO | Exceptioal Taste</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Syne', 'sans-serif'],
+          },
+          colors: {
+            pearl: '#FDFDFD',
+            charcoal: '#1A1A1A',
+            vermilion: '#E03C31',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-pearl text-charcoal font-sans antialiased selection:bg-vermilion selection:text-white">
+
+  <nav
+    class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+      <div class="font-display font-bold text-2xl tracking-widest uppercase">SYÖ & JUO</div>
+      <div class="hidden md:flex gap-10 text-sm font-medium tracking-wide">
+        <a href="#" class="hover:text-vermilion transition-colors">Menu</a>
+        <a href="#" class="hover:text-vermilion transition-colors">The Story</a>
+        <a href="#" class="hover:text-vermilion transition-colors">Reserve</a>
+      </div>
+      <div class="flex items-center gap-4 cursor-pointer group">
+        <div class="text-sm font-medium group-hover:text-vermilion transition-colors">€0.00</div>
+        <div class="relative">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="min-h-screen pt-24 flex flex-col lg:flex-row">
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 lg:px-20 py-20 lg:py-0">
+      <h1 class="font-display font-bold text-5xl lg:text-7xl leading-[1.1] mb-12">
+        Exceptional<br>Taste.<br>Your Way.
+      </h1>
+
+      <div class="max-w-md w-full">
+        <div class="flex p-1 bg-gray-100 rounded-full mb-6">
+          <button
+            class="flex-1 py-3 text-sm font-medium rounded-full text-gray-500 hover:text-charcoal transition-colors">Dine-In</button>
+          <button
+            class="flex-1 py-3 text-sm font-medium rounded-full bg-vermilion text-white shadow-sm transition-all">Pickup</button>
+          <button
+            class="flex-1 py-3 text-sm font-medium rounded-full text-gray-500 hover:text-charcoal transition-colors">Delivery</button>
+        </div>
+
+        <div class="relative mb-8">
+          <input type="text" placeholder="Enter your address or postal code..."
+            class="w-full pb-4 bg-transparent border-b border-gray-300 focus:border-charcoal outline-none text-lg placeholder-gray-400 transition-colors">
+          <button class="absolute right-0 top-0 text-vermilion font-medium">Search</button>
+        </div>
+
+        <a href="#menu" class="inline-flex items-center gap-2 text-lg font-medium group">
+          Explore the Menu
+          <span class="group-hover:translate-x-2 transition-transform duration-300">→</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="w-full lg:w-1/2 h-[50vh] lg:h-auto relative bg-gray-100">
+      <img src="https://images.unsplash.com/photo-1559314809-0d155014e29e?q=80&w=2000&auto=format&fit=crop"
+        alt="Signature Dish" class="absolute inset-0 w-full h-full object-cover">
+    </div>
+  </section>
+
+  <section class="py-32 max-w-7xl mx-auto px-6">
+    <div class="flex justify-between items-end mb-16">
+      <h2 class="font-display font-bold text-4xl">Curated Signatures</h2>
+      <a href="#" class="text-sm font-medium border-b border-charcoal pb-1">View Full Menu</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div class="group cursor-pointer">
+        <div class="w-full aspect-square overflow-hidden bg-gray-100 mb-6">
+          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800&auto=format&fit=crop"
+            alt="Dish"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-display font-bold text-xl mb-2">Nordic Margherita</h3>
+            <p class="text-sm text-gray-500 mb-2">Heritage tomatoes, fresh basil, burnt mozzarella.</p>
+            <p class="font-medium">€18.00</p>
+          </div>
+          <button
+            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-vermilion hover:text-white hover:border-vermilion transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="w-full aspect-square overflow-hidden bg-gray-100 mb-6">
+          <img src="https://images.unsplash.com/photo-1544025162-811114cd3543?q=80&w=800&auto=format&fit=crop"
+            alt="Dish"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-display font-bold text-xl mb-2">Truffle Forager</h3>
+            <p class="text-sm text-gray-500 mb-2">Wild mushrooms, black truffle, confit garlic base.</p>
+            <p class="font-medium">€24.00</p>
+          </div>
+          <button
+            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-vermilion hover:text-white hover:border-vermilion transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="w-full aspect-square overflow-hidden bg-gray-100 mb-6">
+          <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800&auto=format&fit=crop"
+            alt="Dish"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+        </div>
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-display font-bold text-xl mb-2">Artisan Charcuterie</h3>
+            <p class="text-sm text-gray-500 mb-2">Cured meats, local cheeses, house-made focaccia.</p>
+            <p class="font-medium">€32.00</p>
+          </div>
+          <button
+            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-vermilion hover:text-white hover:border-vermilion transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+
+</html>
