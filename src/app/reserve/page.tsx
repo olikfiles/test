@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function ReservePage() {
   const now = new Date();
@@ -22,13 +23,36 @@ export default function ReservePage() {
   });
   const [submitted, setSubmitted] = useState(false);
 
+  const [error, setError] = useState('');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError('');
+
+    const { error: sbError } = await supabase.from('reservations').insert([
+      {
+        guest_name: form.name,
+        guest_email: form.email,
+        guest_phone: form.phone,
+        party_size: parseInt(form.guests),
+        date: form.date,
+        time: form.time,
+        occasion: form.occasion,
+        notes: form.notes,
+        status: 'pending'
+      }
+    ]);
+
+    if (sbError) {
+      setError('Failed to submit reservation. Please try again.');
+      console.error(sbError);
+    } else {
+      setSubmitted(true);
+    }
   };
 
   const inputClass =
@@ -158,6 +182,7 @@ export default function ReservePage() {
                   className="w-full bg-transparent border-b border-gray-200 focus:border-foreground outline-none py-3 text-base placeholder-gray-400 transition-colors resize-none"
                 />
               </div>
+              {error && <p className="text-red-500 text-sm">{error}</p>}
               <button
                 type="submit"
                 className="w-full py-5 bg-primary text-white font-bold text-sm tracking-wide rounded-full hover:bg-primary/90 transition-colors"
