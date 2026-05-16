@@ -22,44 +22,50 @@ export function Header() {
   const total = getCartTotal();
 
   const navLinks = [
+    { href: '/', label: 'Home' },
     { href: '/menu', label: 'Menu' },
-    { href: '/about', label: 'The Story' },
-    { href: '/reserve', label: 'Reserve' },
+    { href: '/story', label: 'Our Story' },
+    { href: '/menu?mode=order', label: 'Order Online' },
+    { href: '/reserve', label: 'Reservation' },
+    { href: '#contact', label: 'Contact' },
   ];
 
   return (
     <>
       <nav
-        className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-          scrolled
+        className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled
             ? 'bg-white/80 backdrop-blur-md border-b border-gray-100'
             : 'bg-transparent border-transparent'
-        }`}
+          }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between relative">
           {/* Logo */}
-          <Link href="/" className="font-display font-bold text-2xl tracking-widest uppercase">
-            SYÖ & JUO
-          </Link>
+          <div className="flex-1">
+            <Link href="/" className="font-display font-bold text-2xl tracking-widest uppercase">
+              SYÖ & JUO
+            </Link>
+          </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex gap-10 text-sm font-medium tracking-wide">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="hover:text-primary transition-colors"
-              >
-                {l.label}
-              </Link>
-            ))}
+          {/* Desktop Nav - Centered Frosted Pill */}
+          <div className="hidden lg:flex items-center justify-center">
+            <div className="flex items-center gap-8 bg-gray-100/40 backdrop-blur-md border border-gray-200/50 px-8 py-3 rounded-full text-[11px] font-bold tracking-[0.15em] uppercase shadow-sm">
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="hover:text-primary transition-colors text-foreground/80 hover:text-foreground"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Right */}
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleDrawer} 
-              className="flex items-center gap-4 cursor-pointer group" 
+          <div className="flex items-center justify-end gap-4 flex-1">
+            <button
+              onClick={toggleDrawer}
+              className="flex items-center gap-4 cursor-pointer group"
               aria-label="Cart"
             >
               {mounted && (
