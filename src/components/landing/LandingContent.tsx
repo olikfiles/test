@@ -447,9 +447,14 @@ export function LandingContent() {
               <motion.div
                 key={testimonialIndex}
                 custom={slideDirection}
-                initial={(dir) => ({ opacity: 0, x: dir === 1 ? 100 : -100 })}
-                animate={{ opacity: 1, x: 0 }}
-                exit={(dir) => ({ opacity: 0, x: dir === 1 ? -100 : 100 })}
+                variants={{
+                  enter: (dir: number) => ({ opacity: 0, x: dir === 1 ? 100 : -100 }),
+                  center: { opacity: 1, x: 0 },
+                  exit: (dir: number) => ({ opacity: 0, x: dir === 1 ? -100 : 100 }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
                 transition={{ duration: 0.6, ease: "easeInOut" }}
                 className="w-full flex flex-col items-center absolute"
               >
