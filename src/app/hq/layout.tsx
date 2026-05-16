@@ -11,11 +11,10 @@ function NavLink({ href, label, icon }: { href: string; label: string; icon: Rea
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-        active
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active
           ? 'bg-primary text-white'
           : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-      }`}
+        }`}
     >
       {icon}
       {label}
@@ -46,7 +45,6 @@ export default function AdminShellLayout({ children }: { children: ReactNode }) 
           <NavLink href={base} label="Dashboard" icon={<LayoutDashboard className="w-4 h-4" />} />
           <NavLink href={`${base}/orders`} label="Orders" icon={<ListOrdered className="w-4 h-4" />} />
           <NavLink href={`${base}/reservations`} label="Reservations" icon={<CalendarDays className="w-4 h-4" />} />
-          <NavLink href={`${base}/menu`} label="Menu Manager" icon={<UtensilsCrossed className="w-4 h-4" />} />
         </nav>
 
         <div className="p-3 border-t border-slate-800">

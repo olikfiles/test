@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       
       if (resend) {
         await resend.emails.send({
-          from: 'SYÖ & JUO <orders@syojuo.fi>', // Requires a verified domain in Resend
+          from: 'SYÖ & JUO <onboarding@resend.dev>', // Default Resend test address
           to: [order.customer_email || 'test@example.com'], // Fallback if no email is collected
           subject: 'Your Order is Confirmed!',
           react: OrderConfirmedEmail({

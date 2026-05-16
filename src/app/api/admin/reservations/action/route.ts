@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       
       if (resend) {
         await resend.emails.send({
-          from: 'SYÖ & JUO Reservations <reservations@syojuo.fi>', // Requires a verified domain in Resend
+          from: 'SYÖ & JUO <onboarding@resend.dev>', // Default Resend test address
           to: [reservation.guest_email],
           subject: 'Your Reservation is Confirmed!',
           react: ReservationConfirmedEmail({
