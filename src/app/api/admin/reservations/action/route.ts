@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
+import { verifyAdminSession } from '@/lib/admin-auth';
 import { Resend } from 'resend';
 import { ReservationConfirmedEmail } from '@/emails/ReservationConfirmedEmail';
 
@@ -7,6 +8,9 @@ const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function POST(req: NextRequest) {
+  if (!await verifyAdminSession()) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id, action, reason } = await req.json();
 

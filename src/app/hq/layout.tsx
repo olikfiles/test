@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, ListOrdered, CalendarDays, UtensilsCrossed, LogOut } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, CalendarDays, UtensilsCrossed, LogOut, BookOpen, Tag } from 'lucide-react';
 import { ReactNode } from 'react';
 
 function NavLink({ href, label, icon }: { href: string; label: string; icon: ReactNode }) {
@@ -45,6 +45,9 @@ export default function AdminShellLayout({ children }: { children: ReactNode }) 
           <NavLink href={base} label="Dashboard" icon={<LayoutDashboard className="w-4 h-4" />} />
           <NavLink href={`${base}/orders`} label="Orders" icon={<ListOrdered className="w-4 h-4" />} />
           <NavLink href={`${base}/reservations`} label="Reservations" icon={<CalendarDays className="w-4 h-4" />} />
+          <div className="h-px bg-slate-800 my-1" />
+          <NavLink href={`${base}/menu`} label="Menu" icon={<BookOpen className="w-4 h-4" />} />
+          <NavLink href={`${base}/deals`} label="Deals" icon={<Tag className="w-4 h-4" />} />
         </nav>
 
         <div className="p-3 border-t border-slate-800">

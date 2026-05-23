@@ -2,27 +2,46 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const SESSION_COOKIE = 'admin_session';
 
-export function middleware(request: NextRequest) {
+// Middleware runs in Edge runtime — use Web Crypto API (no Node crypto imports).
+async function verifySessionCookie(token: string): Promise<boolean> {
+  const secret = process.env.ADMIN_SESSION_SECRET;
+  if (!secret) return false;
+
+  const dot = token.lastIndexOf('.');
+  if (dot === -1) return false;
+  const sessionId = token.slice(0, dot);
+  const sig = token.slice(dot + 1);
+  if (!sessionId || !sig || sig.length % 2 !== 0) return false;
+
+  try {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    // Hex-decode the signature stored in the cookie.
+    const sigBytes = new Uint8Array(sig.length / 2);
+    for (let i = 0; i < sig.length; i += 2) {
+      sigBytes[i / 2] = parseInt(sig.slice(i, i + 2), 16);
+    }
+    return await crypto.subtle.verify('HMAC', key, sigBytes, enc.encode(sessionId));
+  } catch {
+    return false;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const adminPrefix = `/hq`;
 
-  // Only guard the admin portal
-  if (!pathname.startsWith(adminPrefix)) {
-    return NextResponse.next();
-  }
+  if (!pathname.startsWith('/hq')) return NextResponse.next();
+  if (pathname === '/hq/login') return NextResponse.next();
 
-  // Login page is always accessible (it's the auth entrypoint)
-  if (pathname === `${adminPrefix}/login`) {
-    return NextResponse.next();
-  }
-
-  // Check session cookie
-  const session = request.cookies.get(SESSION_COOKIE);
-  const password = process.env.ADMIN_PASSWORD ?? '';
-  const isValid = session?.value === `admin:${password}`;
-
-  if (!isValid) {
-    // Unauthenticated access to /hq directly routes to home to hide the portal
+  const cookie = request.cookies.get(SESSION_COOKIE);
+  if (!cookie || !(await verifySessionCookie(cookie.value))) {
+    // Redirect to home to avoid advertising the admin portal URL.
     return NextResponse.redirect(new URL('/', request.url));
   }
 

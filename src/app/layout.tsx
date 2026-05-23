@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { CartDrawer } from "@/components/layout/CartDrawer";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${syne.variable} h-full`}>
       <body className="min-h-full flex flex-col relative font-sans">
-        <Header />
-        <main className="flex-1 flex flex-col">{children}</main>
-        <CartDrawer />
+        <QueryProvider>
+          <Header />
+          <main className="flex-1 flex flex-col">{children}</main>
+          <CartDrawer />
+        </QueryProvider>
       </body>
     </html>
   );

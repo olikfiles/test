@@ -7,31 +7,10 @@ import { useOrderStore, OrderMode } from '@/store/useOrderStore';
 import { useCartStore } from '@/store/useCartStore';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useWaitTimes } from '@/hooks/useWaitTimes';
+import { useDeals } from '@/hooks/useDeals';
+import { useFeaturedItems } from '@/hooks/useMenu';
 
-/* ─── Data ─── */
-const signatures = [
-  {
-    id: 's1',
-    name: 'Nordic Margherita',
-    description: 'Heritage tomatoes, fresh basil, burnt mozzarella.',
-    price: 18.00,
-    image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?q=80&w=800&auto=format&fit=crop',
-  },
-  {
-    id: 's2',
-    name: 'Truffle Forager',
-    description: 'Wild mushrooms, black truffle, confit garlic base.',
-    price: 24.00,
-    image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800&auto=format&fit=crop',
-  },
-  {
-    id: 's3',
-    name: 'Artisan Charcuterie',
-    description: 'Cured meats, local cheeses, house-made focaccia.',
-    price: 32.00,
-    image: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop',
-  },
-];
 
 const testimonials = [
   {
@@ -79,6 +58,9 @@ export function LandingContent() {
   const router = useRouter();
   const { orderMode, setOrderMode, address, setAddress, restaurantLocation, setRestaurantLocation } = useOrderStore();
   const { addItem } = useCartStore();
+  const { data: waitTimes } = useWaitTimes();
+  const { data: deals } = useDeals();
+  const { data: featuredItems } = useFeaturedItems();
 
   const [mounted, setMounted] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
@@ -141,7 +123,7 @@ export function LandingContent() {
       name: item.name,
       price: item.price,
       quantity: 1,
-      image: item.image,
+      image: item.image ?? item.image_url ?? undefined,
     });
   };
 
@@ -322,6 +304,16 @@ export function LandingContent() {
               {orderMode === 'dine-in' ? 'Reserve a Table' : 'Explore the Menu'}
               <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
             </button>
+
+            {/* Live wait time */}
+            {orderMode !== 'dine-in' && waitTimes && (
+              <p className="text-xs text-muted-foreground mt-4">
+                Estimated wait:{' '}
+                <span className="font-semibold text-foreground">
+                  {orderMode === 'delivery' ? waitTimes.delivery.label : waitTimes.pickup.label}
+                </span>
+              </p>
+            )}
           </motion.div>
         </div>
 
@@ -343,50 +335,65 @@ export function LandingContent() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          CURATED SIGNATURES
+          CURATED SIGNATURES / DEALS
          ═══════════════════════════════════════════════════════ */}
-      <section className="py-32 max-w-7xl mx-auto px-6 w-full relative z-10 bg-background">
-        <div className="flex justify-between items-end mb-16">
-          <h2 className="font-display font-bold text-4xl text-foreground">Curated Signatures</h2>
-          <Link href="/menu" className="text-sm font-medium border-b border-foreground pb-1 text-foreground hover:text-primary transition-colors">
-            View Full Menu
-          </Link>
-        </div>
+      {((deals && deals.length > 0) || (featuredItems && featuredItems.length > 0)) && (
+        <section className="py-32 max-w-7xl mx-auto px-6 w-full relative z-10 bg-background">
+          <div className="flex justify-between items-end mb-16">
+            <h2 className="font-display font-bold text-4xl text-foreground">
+              {deals && deals.length > 0 ? "Today's Deals" : 'Curated Signatures'}
+            </h2>
+            <Link href="/menu" className="text-sm font-medium border-b border-foreground pb-1 text-foreground hover:text-primary transition-colors">
+              View Full Menu
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {signatures.map((item, i) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="group cursor-pointer"
-              onClick={() => handleOptimisticAdd(item)}
-            >
-              <div className="w-full aspect-square overflow-hidden bg-gray-100 mb-6">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="font-display font-bold text-xl mb-2 text-foreground">{item.name}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{item.description}</p>
-                  <p className="font-medium text-foreground">€{item.price.toFixed(2)}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {(deals && deals.length > 0 ? deals : (featuredItems ?? [])).map((item: any, i: number) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="group cursor-pointer"
+                onClick={() => deals && deals.length > 0
+                  ? null  // deals are bundles, navigate to menu
+                  : handleOptimisticAdd(item)
+                }
+              >
+                <div className="w-full aspect-square overflow-hidden bg-gray-100 mb-6 relative">
+                  <img
+                    src={item.image || item.image_url || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop'}
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                  {item.is_time_bound && (
+                    <div className="absolute top-3 left-3 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded">
+                      Limited Time
+                    </div>
+                  )}
                 </div>
-                <button
-                  className="shrink-0 w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors"
-                >
-                  <Plus className="w-5 h-5" strokeWidth={2} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h3 className="font-display font-bold text-xl mb-2 text-foreground">{item.name}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{item.description}</p>
+                    <p className="font-medium text-foreground">€{Number(item.price).toFixed(2)}</p>
+                  </div>
+                  {!(deals && deals.length > 0) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleOptimisticAdd(item); }}
+                      className="shrink-0 w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                    >
+                      <Plus className="w-5 h-5" strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════════════════════════════════════════════
           THE CRAFT (Bento Box Section)

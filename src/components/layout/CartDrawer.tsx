@@ -6,6 +6,7 @@ import { X, Minus, Plus, ShoppingBag, ArrowRight, Truck, Store, Coffee } from 'l
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { DELIVERY_FEE, SERVICE_FEE } from '@/lib/fees';
 
 export function CartDrawer() {
   const { isDrawerOpen, toggleDrawer, items, updateQuantity, removeItem, getCartTotal } = useCartStore();
@@ -19,8 +20,8 @@ export function CartDrawer() {
   if (!mounted) return null;
 
   const subtotal = getCartTotal();
-  const deliveryFee = orderMode === 'delivery' && subtotal > 0 ? 4.90 : 0;
-  const serviceFee = orderMode === 'delivery' && subtotal > 0 ? 1.50 : 0;
+  const deliveryFee = orderMode === 'delivery' && subtotal > 0 ? DELIVERY_FEE : 0;
+  const serviceFee = orderMode === 'delivery' && subtotal > 0 ? SERVICE_FEE : 0;
   const grandTotal = subtotal + deliveryFee + serviceFee;
 
   const modeIcon = 
