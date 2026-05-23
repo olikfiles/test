@@ -55,12 +55,14 @@ export async function POST(req: NextRequest) {
       name: string;
       quantity: number;
       price: number;
+      customizations?: { name: string; price: number }[];
       notes?: string;
     }) => ({
       order_id: order.id,
       name: item.name,
       quantity: item.quantity,
       price: item.price,
+      customizations: item.customizations ?? [],
       notes: item.notes || null,
     }));
 

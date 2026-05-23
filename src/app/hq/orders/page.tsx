@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { X, ChevronRight, Plus, Clock, ChefHat, Truck, Check, Eye } from 'lucide-react';
+import { X, ChevronRight, Clock, ChefHat, Truck, Check, Eye, Phone, MapPin, MessageSquare, Utensils } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type OrderStatus = 'new' | 'confirmed' | 'sent_to_kitchen' | 'on_route' | 'delivered' | 'cancelled';
@@ -163,7 +163,172 @@ export default function OrdersPage() {
         })}
       </div>
 
-      {/* Detail Drawer overlay could be implemented here similarly to the mock one, trimmed for brevity */}
+      {/* ─── Order Detail Drawer ─── */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              onClick={() => setSelectedId(null)}
+            />
+            <motion.div
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 200 }}
+              className="fixed right-0 top-0 h-full w-full max-w-md bg-slate-900 border-l border-slate-700 z-50 flex flex-col shadow-2xl overflow-hidden"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 shrink-0">
+                <div>
+                  <p className="text-slate-400 text-xs font-mono">#{selectedOrder.id.slice(0, 8)}</p>
+                  <h2 className="text-white font-bold text-lg mt-0.5">{selectedOrder.customer_name}</h2>
+                </div>
+                <button onClick={() => setSelectedId(null)} className="text-slate-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+                {/* Status + type badges */}
+                <div className="flex gap-2 flex-wrap">
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full capitalize ${statusBadge[selectedOrder.status]}`}>
+                    {selectedOrder.status.replace('_', ' ')}
+                  </span>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300 capitalize">
+                    {selectedOrder.type}
+                  </span>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-400">
+                    {timeAgo(selectedOrder.created_at)}
+                  </span>
+                </div>
+
+                {/* Customer info */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500">Customer</p>
+                  <div className="flex items-center gap-2 text-slate-300 text-sm">
+                    <Phone className="w-4 h-4 text-slate-500 shrink-0" />
+                    {selectedOrder.customer_phone}
+                  </div>
+                  {selectedOrder.address && (
+                    <div className="flex items-start gap-2 text-slate-300 text-sm">
+                      <MapPin className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                      {selectedOrder.address}
+                    </div>
+                  )}
+                </div>
+
+                {/* Order-level notes */}
+                {selectedOrder.notes && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-amber-400 mb-1.5 flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" /> Note to kitchen
+                    </p>
+                    <p className="text-amber-200 text-sm leading-relaxed">{selectedOrder.notes}</p>
+                  </div>
+                )}
+
+                {/* Order items */}
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Items</p>
+                  <div className="space-y-4">
+                    {(selectedOrder.order_items || []).map((item: any, i: number) => (
+                      <div key={i} className="bg-slate-800 rounded-xl p-4">
+                        {/* Item name + quantity */}
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-primary font-bold text-sm shrink-0">{item.quantity}×</span>
+                            <span className="text-white font-semibold text-sm">{item.name}</span>
+                          </div>
+                          <span className="text-slate-300 font-bold text-sm shrink-0">€{Number(item.price).toFixed(2)}</span>
+                        </div>
+
+                        {/* Customizations (size, add-ons, removed ingredients) */}
+                        {item.customizations && item.customizations.length > 0 && (
+                          <div className="mt-2 space-y-1 pl-6">
+                            {item.customizations.map((c: { name: string; price: number }, ci: number) => (
+                              <div key={ci} className="flex items-center justify-between text-xs">
+                                <span className={`font-medium ${c.name.startsWith('- No') ? 'text-red-400' : 'text-emerald-400'}`}>
+                                  {c.name}
+                                </span>
+                                {c.price > 0 && (
+                                  <span className="text-slate-400">+€{c.price.toFixed(2)}</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Per-item special instructions */}
+                        {item.notes && (
+                          <div className="mt-2 pl-6 flex items-start gap-1.5">
+                            <Utensils className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                            <p className="text-amber-300 text-xs italic">{item.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price breakdown */}
+                <div className="bg-slate-800 rounded-xl p-4 space-y-2">
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Total</p>
+                  {selectedOrder.delivery_fee > 0 && (
+                    <div className="flex justify-between text-sm text-slate-400">
+                      <span>Delivery fee</span>
+                      <span>€{Number(selectedOrder.delivery_fee).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {selectedOrder.service_fee > 0 && (
+                    <div className="flex justify-between text-sm text-slate-400">
+                      <span>Service fee</span>
+                      <span>€{Number(selectedOrder.service_fee).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-white pt-2 border-t border-slate-700">
+                    <span>Total</span>
+                    <span>€{Number(selectedOrder.total).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Status history */}
+                {selectedOrder.status_history && selectedOrder.status_history.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-slate-500 mb-3">Timeline</p>
+                    <div className="space-y-2">
+                      {[...selectedOrder.status_history].reverse().map((h: { status: string; at: string }, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="text-slate-300 capitalize font-medium">{h.status.replace('_', ' ')}</span>
+                          <span className="text-slate-500">{new Date(h.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Advance action */}
+              {nextStatus[selectedOrder.status as OrderStatus] && (
+                <div className="shrink-0 px-6 py-5 border-t border-slate-800 bg-slate-900">
+                  <button
+                    onClick={() => {
+                      const next = nextStatus[selectedOrder.status as OrderStatus]!;
+                      advanceOrder(selectedOrder.id, next.status, selectedOrder.status_history);
+                      setSelectedId(null);
+                    }}
+                    className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                  >
+                    {nextStatus[selectedOrder.status as OrderStatus]!.icon}
+                    {nextStatus[selectedOrder.status as OrderStatus]!.label}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

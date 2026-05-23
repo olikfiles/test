@@ -35,7 +35,8 @@ export default function CheckoutPage() {
       name: item.name,
       price: item.price + (item.customizations?.reduce((s, c) => s + c.price, 0) ?? 0),
       quantity: item.quantity,
-      notes: item.instructions,
+      customizations: item.customizations ?? [],
+      notes: item.instructions || undefined,
     }));
 
     createOrder.mutate(

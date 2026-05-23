@@ -183,3 +183,8 @@ ALTER TABLE public.menu_items
   ADD COLUMN IF NOT EXISTS sizes                 JSONB    DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS removable_ingredients TEXT[]   DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS addons                JSONB    DEFAULT '[]';
+
+-- 13. Order item customizations column
+-- Stores per-item customizations (removed ingredients, add-ons, size) as ordered.
+ALTER TABLE public.order_items
+  ADD COLUMN IF NOT EXISTS customizations JSONB DEFAULT '[]';

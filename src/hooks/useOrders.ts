@@ -34,7 +34,7 @@ export interface CreateOrderPayload {
   type: 'delivery' | 'pickup' | 'walk-in';
   address?: string;
   notes?: string;
-  items: { name: string; price: number; quantity: number; notes?: string }[];
+  items: { name: string; price: number; quantity: number; customizations?: { name: string; price: number }[]; notes?: string }[];
 }
 
 // Statuses that mean the order is no longer in progress
