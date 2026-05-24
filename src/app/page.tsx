@@ -1,6 +1,6 @@
-import { LandingContent } from "@/components/landing/LandingContent";
+import { Storefront } from "@/components/storefront/Storefront";
 
 export default function Home() {
-  return <LandingContent />;
+  return <Storefront />;
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col relative font-sans">
         <Header />
         <main className="flex-1 flex flex-col">{children}</main>
+        <Footer />
         <CartDrawer />
       </body>
     </html>

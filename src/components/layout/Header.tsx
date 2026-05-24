@@ -24,8 +24,8 @@ export function Header() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/menu', label: 'Menu' },
+    { href: '/deals', label: 'Deals' },
     { href: '/story', label: 'Our Story' },
-    { href: '/menu?mode=order', label: 'Order Online' },
     { href: '/reserve', label: 'Reservation' },
     { href: '#contact', label: 'Contact' },
   ];
@@ -34,16 +34,16 @@ export function Header() {
     <>
       <nav
         className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled
-            ? 'bg-white/80 backdrop-blur-md border-b border-gray-100'
-            : 'bg-transparent border-transparent'
+          ? 'bg-white/80 backdrop-blur-md border-b border-gray-100'
+          : 'bg-transparent border-transparent'
           }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between relative">
           {/* Logo */}
           <div className="flex-1">
-            <Link href="/" className="font-display font-bold text-2xl tracking-widest uppercase">
+            {/* <Link href="/" className="font-display font-bold text-2xl tracking-widest uppercase">
               SYÖ & JUO
-            </Link>
+            </Link> */}
           </div>
 
           {/* Desktop Nav - Centered Frosted Pill */}

@@ -6,10 +6,11 @@ import { useOrderStore } from '@/store/useOrderStore';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
-  const { orderMode, address } = useOrderStore();
+  const { orderMode, setOrderMode, address } = useOrderStore();
   
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -17,10 +18,12 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
   
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
-  const cartTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const deliveryFee = orderMode === 'delivery' ? 5.90 : 0;
+  const cartTotal = subtotal + deliveryFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +65,7 @@ export default function CheckoutPage() {
       if (itemsError) throw itemsError;
 
       clearCart();
-      setSuccess(true);
+      router.push(`/success?orderId=${orderData.id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to place order');
     } finally {
@@ -72,30 +75,15 @@ export default function CheckoutPage() {
 
   const inputClass = 'w-full bg-transparent border-b border-gray-200 focus:border-foreground outline-none py-3 text-base placeholder-gray-400 transition-colors';
 
-  if (success) {
-    return (
-      <div className="min-h-screen pt-32 pb-32 bg-background flex flex-col items-center justify-center text-center px-6">
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-8 text-3xl">✓</div>
-          <h1 className="font-display font-bold text-4xl mb-4">Order Received</h1>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">
-            Your {orderMode} order has been sent to the kitchen. We will prepare it with the utmost care.
-          </p>
-          <Link href="/" className="px-8 py-4 bg-foreground text-white font-bold rounded-full hover:bg-foreground/90 transition-colors">
-            Return to Home
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen pt-32 pb-32 bg-background">
       <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20">
         
         {/* Form */}
         <div>
-          <p className="text-xs font-bold tracking-[0.25em] uppercase text-muted-foreground mb-6">Checkout</p>
+          <Link href="/" className="inline-block mb-12 text-sm font-bold text-gray-500 hover:text-foreground transition-colors">
+            ← Back to Menu
+          </Link>
           <h1 className="font-display font-bold text-5xl text-foreground mb-12">Details</h1>
           
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -136,7 +124,29 @@ export default function CheckoutPage() {
 
         {/* Order Summary */}
         <div className="bg-gray-50 rounded-3xl p-10 h-fit">
-          <h2 className="font-display font-bold text-2xl mb-8">Your Order</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="font-display font-bold text-2xl">Your Order</h2>
+          </div>
+          
+          <div className="flex p-1 bg-white rounded-lg mb-6 shadow-sm border border-gray-100">
+            <button
+              onClick={() => setOrderMode('delivery')}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-colors ${
+                orderMode === 'delivery' ? 'bg-foreground text-white' : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              Delivery (45-60 min)
+            </button>
+            <button
+              onClick={() => setOrderMode('pickup')}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-colors ${
+                orderMode === 'pickup' ? 'bg-foreground text-white' : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              Takeout (15-20 min)
+            </button>
+          </div>
+
           <div className="space-y-4 mb-8">
             {items.length === 0 ? (
               <p className="text-gray-500">Your cart is empty.</p>
@@ -156,11 +166,11 @@ export default function CheckoutPage() {
           <div className="border-t border-gray-200 pt-6">
             <div className="flex justify-between items-center mb-2">
               <p className="text-gray-500 text-sm">Subtotal</p>
-              <p className="font-medium">€{cartTotal.toFixed(2)}</p>
+              <p className="font-medium">€{subtotal.toFixed(2)}</p>
             </div>
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-500 text-sm">{orderMode === 'delivery' ? 'Delivery Fee' : 'Service Fee'}</p>
-              <p className="font-medium">€0.00</p>
+              <p className="font-medium">€{deliveryFee.toFixed(2)}</p>
             </div>
             <div className="flex justify-between items-center text-xl font-bold">
               <p>Total</p>
