@@ -17,9 +17,18 @@ export async function POST(req: NextRequest) {
   try {
     const { id, status, currentHistory } = await req.json();
 
+    const ALLOWED_STATUSES = ['confirmed', 'sent_to_kitchen', 'on_route', 'delivered', 'cancelled'];
+
     if (!id || !status) {
       logger.warn(CTX, 'Missing id or status');
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { error: `Invalid status. Must be one of: ${ALLOWED_STATUSES.join(', ')}` },
+        { status: 400 }
+      );
     }
 
     logger.info(CTX, `Advancing order ${id.slice(0, 8)} → ${status}`);
@@ -28,15 +37,21 @@ export async function POST(req: NextRequest) {
     const history = currentHistory || [];
     const { data: order, error } = await supabase
       .from('orders')
-      .update({ 
-        status, 
-        status_history: [...history, { status, at: new Date().toISOString() }] 
+      .update({
+        status,
+        status_history: [...history, { status, at: new Date().toISOString() }]
       })
       .eq('id', id)
       .select('*, order_items(*)')
       .single();
 
-    if (error) { logger.error(CTX, 'DB update failed', { orderId: id, error: error.message }); throw error; }
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+      logger.error(CTX, 'DB update failed', { orderId: id, error: error.message });
+      throw error;
+    }
 
     logger.info(CTX, `Order ${id.slice(0, 8)} updated to ${status}`);
 

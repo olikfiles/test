@@ -38,6 +38,19 @@ export async function PUT(
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
+    // Validate category_id exists if being changed
+    if (updates.category_id) {
+      const { data: cat, error: catError } = await supabase
+        .from('menu_categories')
+        .select('id')
+        .eq('id', updates.category_id)
+        .single();
+
+      if (catError || !cat) {
+        return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+      }
+    }
+
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -47,7 +60,12 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ item: data });
   } catch (err: any) {
@@ -72,9 +90,16 @@ export async function DELETE(
     const { error } = await supabase
       .from('menu_items')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

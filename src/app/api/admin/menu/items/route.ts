@@ -29,6 +29,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
     }
 
+    // Validate category exists
+    const { data: category, error: catError } = await supabase
+      .from('menu_categories')
+      .select('id')
+      .eq('id', category_id)
+      .single();
+
+    if (catError || !category) {
+      return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+    }
+
     // Default sort_order to end of category list
     let order = sort_order;
     if (order === undefined || order === null) {
@@ -62,7 +73,7 @@ export async function POST(req: NextRequest) {
     logger.info(CTX, 'Item created', { id: data.id, name: data.name, image_url: data.image_url });
     return NextResponse.json({ item: data }, { status: 201 });
   } catch (err: any) {
-    console.error('POST /api/admin/menu/items error:', err);
+    logger.error(CTX, 'Create item error', { message: err.message });
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

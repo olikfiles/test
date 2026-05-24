@@ -20,12 +20,33 @@ export async function POST(
       return NextResponse.json({ error: 'tag_id is required' }, { status: 400 });
     }
 
+    // Validate item exists
+    const { data: item, error: itemError } = await supabase
+      .from('menu_items')
+      .select('id')
+      .eq('id', item_id)
+      .single();
+
+    if (itemError || !item) {
+      return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
+    }
+
+    // Validate tag exists
+    const { data: tag, error: tagError } = await supabase
+      .from('menu_tags')
+      .select('id')
+      .eq('id', tag_id)
+      .single();
+
+    if (tagError || !tag) {
+      return NextResponse.json({ error: 'Tag not found' }, { status: 404 });
+    }
+
     const { error } = await supabase
       .from('menu_item_tags')
       .insert([{ item_id, tag_id }]);
 
     if (error) {
-      // Primary key duplicate — tag already assigned
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Tag already assigned to this item' }, { status: 409 });
       }

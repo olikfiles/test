@@ -188,3 +188,9 @@ ALTER TABLE public.menu_items
 -- Stores per-item customizations (removed ingredients, add-ons, size) as ordered.
 ALTER TABLE public.order_items
   ADD COLUMN IF NOT EXISTS customizations JSONB DEFAULT '[]';
+
+-- 14. Order item → menu item traceability
+-- Links each order item back to the source menu item for analytics and price validation.
+-- Nullable because historical orders predate this column and items can be deleted after ordering.
+ALTER TABLE public.order_items
+  ADD COLUMN IF NOT EXISTS menu_item_id UUID REFERENCES public.menu_items(id) ON DELETE SET NULL;

@@ -14,17 +14,26 @@ export async function POST(req: NextRequest) {
   try {
     const { id, action, reason } = await req.json();
 
+    const ALLOWED_ACTIONS = ['confirm', 'decline', 'seat', 'no_show'];
+
     if (!id || !action) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const statusMap: Record<string, string> = { 
-      confirm: 'confirmed', 
-      decline: 'declined', 
-      seat: 'seated', 
-      no_show: 'no_show' 
+    if (!ALLOWED_ACTIONS.includes(action)) {
+      return NextResponse.json(
+        { error: `Invalid action. Must be one of: ${ALLOWED_ACTIONS.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    const statusMap: Record<string, string> = {
+      confirm: 'confirmed',
+      decline: 'declined',
+      seat: 'seated',
+      no_show: 'no_show'
     };
-    
+
     const newStatus = statusMap[action];
     const updates: any = { status: newStatus };
     if (action === 'decline' && reason) updates.notes = `DECLINED REASON: ${reason}`;
@@ -37,7 +46,12 @@ export async function POST(req: NextRequest) {
       .select('*')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     // 2. Send Email if the reservation was just confirmed
     if (action === 'confirm' && reservation) {

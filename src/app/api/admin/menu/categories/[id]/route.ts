@@ -31,7 +31,12 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ category: data });
   } catch (err: any) {
@@ -56,9 +61,16 @@ export async function DELETE(
     const { error } = await supabase
       .from('menu_categories')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

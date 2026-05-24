@@ -32,6 +32,7 @@ export default function CheckoutPage() {
     if (!items.length) return;
 
     const orderItems = items.map(item => ({
+      menu_item_id: item.baseId,
       name: item.name,
       price: item.price + (item.customizations?.reduce((s, c) => s + c.price, 0) ?? 0),
       quantity: item.quantity,

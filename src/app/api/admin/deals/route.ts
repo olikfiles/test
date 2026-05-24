@@ -2,9 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { verifyAdminSession } from '@/lib/admin-auth';
 
+async function validateItemIds(item_ids: string[]): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('menu_items')
+    .select('id')
+    .in('id', item_ids);
+
+  if (error) throw error;
+
+  const foundIds = (data ?? []).map((i: { id: string }) => i.id);
+  const missing = item_ids.filter(id => !foundIds.includes(id));
+
+  if (missing.length > 0) {
+    return `Menu item(s) not found: ${missing.join(', ')}`;
+  }
+  return null;
+}
+
 // POST /api/admin/deals
 // Create a new deal/bundle
-// Body: { name, description?, price, item_ids[], is_time_bound?, start_date?, end_date? }
 export async function POST(req: NextRequest) {
   if (!await verifyAdminSession()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,6 +46,12 @@ export async function POST(req: NextRequest) {
         { error: 'start_date and end_date are required for time-bound deals' },
         { status: 400 }
       );
+    }
+
+    // Validate all item_ids exist
+    const itemValidationError = await validateItemIds(item_ids);
+    if (itemValidationError) {
+      return NextResponse.json({ error: itemValidationError }, { status: 404 });
     }
 
     const { data, error } = await supabase

@@ -19,9 +19,16 @@ export async function DELETE(
       .from('menu_item_tags')
       .delete()
       .eq('item_id', item_id)
-      .eq('tag_id', tag_id);
+      .eq('tag_id', tag_id)
+      .select('item_id')
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Tag assignment not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

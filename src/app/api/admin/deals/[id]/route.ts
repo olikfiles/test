@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { verifyAdminSession } from '@/lib/admin-auth';
 
+async function validateItemIds(item_ids: string[]): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('menu_items')
+    .select('id')
+    .in('id', item_ids);
+
+  if (error) throw error;
+
+  const foundIds = (data ?? []).map((i: { id: string }) => i.id);
+  const missing = item_ids.filter(id => !foundIds.includes(id));
+
+  if (missing.length > 0) {
+    return `Menu item(s) not found: ${missing.join(', ')}`;
+  }
+  return null;
+}
+
 // PUT /api/admin/deals/[id]
 // Update deal fields (including toggling is_active, changing dates, price, items)
 export async function PUT(
@@ -38,6 +55,17 @@ export async function PUT(
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
+    // Validate item_ids if being changed
+    if (updates.item_ids !== undefined) {
+      if (!Array.isArray(updates.item_ids) || updates.item_ids.length === 0) {
+        return NextResponse.json({ error: 'item_ids must be a non-empty array' }, { status: 400 });
+      }
+      const itemValidationError = await validateItemIds(updates.item_ids);
+      if (itemValidationError) {
+        return NextResponse.json({ error: itemValidationError }, { status: 404 });
+      }
+    }
+
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -47,7 +75,12 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ deal: data });
   } catch (err: any) {
@@ -72,9 +105,16 @@ export async function DELETE(
     const { error } = await supabase
       .from('deals')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
