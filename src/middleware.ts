@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
 
   if (!isValid) {
     // Unauthenticated access to /hq directly routes to home to hide the portal
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/hq/login', request.url));
   }
 
   return NextResponse.next();

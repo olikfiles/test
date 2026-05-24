@@ -61,7 +61,7 @@ export default function MenuPage() {
                   description={item.description}
                   price={item.price}
                   image={item.image}
-                  featured={item.featured}
+                  featured={item.isSpecial || item.isChefRecommended}
                   onCustomize={() => setSelectedItem(item)}
                 />
               ))}
